@@ -47,35 +47,62 @@ def flatten(lists):
     return flat
 
 def translate(c):
-    tiles = ('2#T1','t Cw.','sh')
+    tiles = ('2#T1','t Cw.','sh@')
     temp = [[(j,(x,y)) for (x,j) in enumerate(i)] for (y,i) in enumerate(tiles)]
     return dict(flatten(temp))[c]
 
 pygame.init()
 screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh))
 background = pygame.Surface((screenw, screenh))
+mix = pygame.Surface((screenw, screenh))
 loltiles = dict(tiles('lolgame5.png', 24, 16))
 
 background.fill((0, 0, 0))
 [background.blit(loltiles[translate(bl[y][x])], coord((x, y))) for x in range(WIDTH) for y in range(HEIGHT)]
-background.blit(loltiles[(2,2)], coord((5, 5)))
-screen.blit(double(background, times - 1), (0, 0))
+overlays = pygame.sprite.RenderUpdates()
+overlay = pygame.sprite.Sprite(overlays)
+image = loltiles[translate('@')]
+overlay.image = image
+overlay.rect = image.get_rect().move(coord((2, 2)))
+mix.blit(background, (0, 0))
+overlays.draw(mix)
+screen.blit(double(mix, times - 1), (0, 0))
 
 clock = pygame.time.Clock()
 #clock.tick(1)
 
 pygame.display.flip()
 homerun = True
+x=2
+y=2
 while homerun:
+    overlays = pygame.sprite.RenderUpdates()
+    overlay = pygame.sprite.Sprite(overlays)
+    image = loltiles[translate('@')]
+    overlay.image = image
+    overlay.rect = image.get_rect().move(coord((x, y)))
+    screen.blit(double(mix, times - 1), (0, 0))
+    overlays.draw(mix)
+    pygame.display.flip()
     clock.tick(30)
     for event in pygame.event.get():
         if event.type == pygame.locals.QUIT:
              homerun = False
         elif event.type == pygame.locals.KEYDOWN:
              key = event.key
-             if key == pygame.locals.K_PLUS:
+             if key == pygame.locals.K_DOWN:
+                 y += 1
+             elif key == pygame.locals.K_UP:
+                 y -= 1
+             elif key == pygame.locals.K_LEFT:
+                 x -= 1
+             elif key == pygame.locals.K_RIGHT:
+                 x += 1
+             elif key == pygame.locals.K_PLUS:
                  print '+'
+                 times += 1
              elif key == pygame.locals.K_MINUS:
                  print '-'
+                 times -= 1
              elif key == pygame.locals.K_q:
                  homerun = False
