@@ -76,15 +76,12 @@ homerun = True
 x=2
 y=2
 while homerun:
-    overlays = pygame.sprite.RenderUpdates()
-    overlay = pygame.sprite.Sprite(overlays)
-    image = loltiles[translate('@')]
-    overlay.image = image
     overlay.rect = image.get_rect().move(coord((x, y)))
-    screen.blit(double(mix, times - 1), (0, 0))
     overlays.draw(mix)
-    pygame.display.flip()
+    screen.blit(double(mix, times - 1), (0, 0))
     clock.tick(30)
+    pygame.display.flip()
+    overlays.clear(mix, background)
     for event in pygame.event.get():
         if event.type == pygame.locals.QUIT:
              homerun = False
