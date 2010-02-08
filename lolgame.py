@@ -8,7 +8,9 @@ WIDTH = 16
 HEIGHT = 14
 screenw = 400
 screenh = 240
+screenf = 0
 times = 2
+oldtimes = 2
 mapx = 0
 mapy = 1
 
@@ -62,12 +64,12 @@ def gettile(symbol):
     return loltiles[tilecoord]
 
 pygame.init()
-screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh))
+screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh), screenf)
 background = pygame.Surface((screenw, screenh))
 mix = pygame.Surface((screenw, screenh))
 loltiles = dict(tiles('lolgame5.png', 24, 16))
 
-background.fill((0, 0, 0))
+background.fill((15, 15, 15))
 [background.blit(gettile(bl[y][x]), coord((x, y))) for x in range(WIDTH) for y in range(HEIGHT)]
 overlays = pygame.sprite.RenderUpdates()
 overlay = pygame.sprite.Sprite(overlays)
@@ -76,19 +78,18 @@ overlay.image = image
 overlay.rect = image.get_rect().move(coord((2, 2)))
 mix.blit(background, (0, 0))
 overlays.draw(mix)
-screen.blit(double(mix, times - 1), (0, 0))
 
 clock = pygame.time.Clock()
 #clock.tick(1)
 
-pygame.display.flip()
 homerun = True
 x=2
 y=2
 while homerun:
     overlay.rect = image.get_rect().move(coord((x, y)))
     overlays.draw(mix)
-    screen.blit(double(mix, times - 1), (0, 0))
+    (cw, ch) = screen.get_size()
+    screen.blit(double(mix, times - 1), ((cw-((2**(times-1))*screenw))/2,(ch-((2**(times-1))*screenh))/2 ))
     clock.tick(30)
     pygame.display.flip()
     overlays.clear(mix, background)
@@ -111,11 +112,37 @@ while homerun:
                      x += 1
              elif key == pygame.locals.K_PLUS:
                  if times < 5:
-                     times += 1
-                     screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh))
+                         if screenf != pygame.FULLSCREEN:
+                             times += 1
+                             screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh), screenf)
              elif key == pygame.locals.K_MINUS:
                  if times > 1:
-                     times -= 1
-                     screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh))
+                         if screenf != pygame.FULLSCREEN:
+                             times -= 1
+                             screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh), screenf)
+             elif key == pygame.locals.K_0:
+                 if screenf != pygame.FULLSCREEN:
+                     times = 2
+                     screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh), screenf)
              elif key == pygame.locals.K_q:
                  homerun = False
+             elif key == pygame.locals.K_F11:
+                 if screenf != 0:
+                     screenf = 0
+                     times = oldtimes
+                 else:
+                     def dunno(a, b):
+                         n = 0
+                         while b < a:
+                             b *= 2
+                             n += 1
+                         return n
+                     oldtimes = times
+                     screenf = pygame.FULLSCREEN
+                     modes = pygame.display.list_modes()
+                     modetimes = [min(dunno(w,screenw), dunno(h,screenh)) for (w, h) in modes]
+                     mtmax = max(modetimes)
+                     (times, _) = min([(mt, m) for (mt, m) in zip(modetimes, modes) if mt == mtmax])
+
+                 screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh), screenf)
+
