@@ -9,6 +9,8 @@ HEIGHT = 14
 screenw = 400
 screenh = 240
 times = 2
+mapx = 0
+mapy = 1
 
 def double(surf, n):
     if n < 1:
@@ -47,9 +49,17 @@ def flatten(lists):
     return flat
 
 def translate(c):
-    tiles = ('2#T1','t Cw.','sh@')
+    tiles = ('?2#T14','t Cw.','sh@3H')
     temp = [[(j,(x,y)) for (x,j) in enumerate(i)] for (y,i) in enumerate(tiles)]
     return dict(flatten(temp))[c]
+
+def gettile(symbol):
+    try:
+        tilecoord = translate(symbol)
+    except:
+        tilecoord = (0,0)
+
+    return loltiles[tilecoord]
 
 pygame.init()
 screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh))
@@ -58,7 +68,7 @@ mix = pygame.Surface((screenw, screenh))
 loltiles = dict(tiles('lolgame5.png', 24, 16))
 
 background.fill((0, 0, 0))
-[background.blit(loltiles[translate(bl[y][x])], coord((x, y))) for x in range(WIDTH) for y in range(HEIGHT)]
+[background.blit(gettile(bl[y][x]), coord((x, y))) for x in range(WIDTH) for y in range(HEIGHT)]
 overlays = pygame.sprite.RenderUpdates()
 overlay = pygame.sprite.Sprite(overlays)
 image = loltiles[translate('@')]
@@ -88,18 +98,24 @@ while homerun:
         elif event.type == pygame.locals.KEYDOWN:
              key = event.key
              if key == pygame.locals.K_DOWN:
-                 y += 1
+                 if y < HEIGHT - 1:
+                     y += 1
              elif key == pygame.locals.K_UP:
-                 y -= 1
+                 if y > 0:
+                     y -= 1
              elif key == pygame.locals.K_LEFT:
-                 x -= 1
+                 if x > 0:
+                     x -= 1
              elif key == pygame.locals.K_RIGHT:
-                 x += 1
+                 if x < WIDTH - 1:
+                     x += 1
              elif key == pygame.locals.K_PLUS:
-                 print '+'
-                 times += 1
+                 if times < 5:
+                     times += 1
+                     screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh))
              elif key == pygame.locals.K_MINUS:
-                 print '-'
-                 times -= 1
+                 if times > 1:
+                     times -= 1
+                     screen = pygame.display.set_mode((2**(times-1)*screenw, 2**(times-1)*screenh))
              elif key == pygame.locals.K_q:
                  homerun = False
